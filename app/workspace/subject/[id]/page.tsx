@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 import AskQuestionBot from "./AskQuestionBot";
+import StudyTools from "./StudyTools";
 
 type DocumentItem = {
   id: string;
@@ -22,8 +23,6 @@ type Subject = {
   documents: DocumentItem[];
   createdAt: string;
 };
-
-type StudyTool = "quiz" | "topics" | "flowchart";
 
 export default function SubjectPage() {
   const router = useRouter();
@@ -77,16 +76,6 @@ export default function SubjectPage() {
   );
 
   const [deleting, setDeleting] = useState(false);
-
-  // =========================================================
-  // STUDY TOOL STATE
-  // =========================================================
-
-  const [activeStudyTool, setActiveStudyTool] =
-    useState<StudyTool>("quiz");
-
-  const [quizQuestionCount, setQuizQuestionCount] = useState(10);
-  const [quizStarted, setQuizStarted] = useState(false);
 
   // =========================================================
   // DOCUMENT HELPERS
@@ -328,6 +317,10 @@ export default function SubjectPage() {
   }
 
   // =========================================================
+  // UPLOAD DOCUMENTS
+  // =========================================================
+
+  // =========================================================
   // PREPARE EXISTING DOCUMENTS FOR AI
   // Re-runs text extraction + chunking for every document in
   // this subject. Safe to repeat: old chunks are replaced.
@@ -414,10 +407,6 @@ export default function SubjectPage() {
       setPreparing(false);
     }
   }
-
-  // =========================================================
-  // UPLOAD DOCUMENTS
-  // =========================================================
 
   async function handleAddDocuments() {
     if (!subject || selectedFiles.length === 0) {
@@ -1176,24 +1165,6 @@ export default function SubjectPage() {
   }
 
   // =========================================================
-  // STUDY TOOLS
-  // =========================================================
-
-  function handleStudyTool(
-    tool: StudyTool
-  ) {
-    setActiveStudyTool(tool);
-
-    if (tool !== "quiz") {
-      setQuizStarted(false);
-    }
-  }
-
-  function handleStartQuiz() {
-    setQuizStarted(true);
-  }
-
-  // =========================================================
   // LOADING
   // =========================================================
 
@@ -1657,490 +1628,14 @@ export default function SubjectPage() {
         </section>
 
         {/* ===================================================
-            STUDY TOOLS — SECOND UI
+            STUDY TOOLS — QUIZ, KEY TOPICS, FLOWCHART
         =================================================== */}
 
-        <section className="mt-10">
-
-          <div className="mb-6">
-
-            <p className="mb-2 text-sm font-medium tracking-wide text-accent">
-              STUDY TOOLS
-            </p>
-
-            <h2 className="font-serif text-4xl tracking-tight">
-              Supercharge your learning
-            </h2>
-
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-              Turn your study material into different
-              ways of learning. Pick a mode and get
-              started.
-            </p>
-
-          </div>
-
-          {/* =================================================
-              THREE STUDY TOOL CARDS
-          ================================================= */}
-
-          <div className="grid gap-5 md:grid-cols-3">
-
-            {/* QUIZ CARD */}
-
-            <button
-              onClick={() =>
-                handleStudyTool("quiz")
-              }
-              className={`group rounded-3xl border p-7 text-left transition-all ${
-                activeStudyTool === "quiz"
-                  ? "border-accent bg-card shadow-sm"
-                  : "border-border bg-card hover:-translate-y-0.5 hover:shadow-sm"
-              }`}
-            >
-
-              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-background text-2xl">
-                🏆
-              </div>
-
-              <p className="font-serif text-2xl">
-                Generate Quiz
-              </p>
-
-              <p className="mt-2 text-sm leading-6 text-muted">
-                Create personalized quizzes from
-                your documents.
-              </p>
-
-              <div className="mt-6 flex items-center text-sm font-medium text-accent">
-                Start quiz
-                <span className="ml-2 transition-transform group-hover:translate-x-1">
-                  →
-                </span>
-              </div>
-
-            </button>
-
-            {/* KEY TOPICS CARD */}
-
-            <button
-              onClick={() =>
-                handleStudyTool("topics")
-              }
-              className={`group rounded-3xl border p-7 text-left transition-all ${
-                activeStudyTool === "topics"
-                  ? "border-accent bg-card shadow-sm"
-                  : "border-border bg-card hover:-translate-y-0.5 hover:shadow-sm"
-              }`}
-            >
-
-              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-background text-2xl">
-                ☷
-              </div>
-
-              <p className="font-serif text-2xl">
-                Key Topics
-              </p>
-
-              <p className="mt-2 text-sm leading-6 text-muted">
-                Extract and explore important topics
-                from your material.
-              </p>
-
-              <div className="mt-6 flex items-center text-sm font-medium text-accent">
-                Explore topics
-                <span className="ml-2 transition-transform group-hover:translate-x-1">
-                  →
-                </span>
-              </div>
-
-            </button>
-
-            {/* FLOWCHART CARD */}
-
-            <button
-              onClick={() =>
-                handleStudyTool("flowchart")
-              }
-              className={`group rounded-3xl border p-7 text-left transition-all ${
-                activeStudyTool === "flowchart"
-                  ? "border-accent bg-card shadow-sm"
-                  : "border-border bg-card hover:-translate-y-0.5 hover:shadow-sm"
-              }`}
-            >
-
-              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-background text-2xl">
-                ↗
-              </div>
-
-              <p className="font-serif text-2xl">
-                Subject Flowchart
-              </p>
-
-              <p className="mt-2 text-sm leading-6 text-muted">
-                Visual overview of how everything
-                connects.
-              </p>
-
-              <div className="mt-6 flex items-center text-sm font-medium text-accent">
-                Visualize
-                <span className="ml-2 transition-transform group-hover:translate-x-1">
-                  →
-                </span>
-              </div>
-
-            </button>
-
-          </div>
-
-          {/* =================================================
-              QUIZ PANEL
-          ================================================= */}
-
-          {activeStudyTool === "quiz" && (
-            <div className="mt-6 rounded-3xl border border-border bg-card p-7 shadow-sm md:p-8">
-
-              {!quizStarted ? (
-
-                <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-
-                  <div>
-
-                    <div className="mb-5 inline-flex rounded-full bg-background px-4 py-2 text-xs font-medium text-accent">
-                      QUICK CHALLENGE
-                    </div>
-
-                    <h3 className="font-serif text-3xl md:text-4xl">
-                      Ready to test yourself?
-                    </h3>
-
-                    <p className="mt-3 max-w-xl text-sm leading-7 text-muted">
-                      Choose how many questions you
-                      want and turn your{" "}
-                      {subject.name} material into a
-                      focused practice session.
-                    </p>
-
-                    <div className="mt-7">
-
-                      <p className="mb-3 text-sm font-medium">
-                        Number of questions
-                      </p>
-
-                      <div className="grid grid-cols-4 gap-2">
-
-                        {[10, 15, 20, 25].map(
-                          (count) => (
-                            <button
-                              key={count}
-                              onClick={() =>
-                                setQuizQuestionCount(
-                                  count
-                                )
-                              }
-                              className={`rounded-xl border px-3 py-3 text-sm font-medium transition ${
-                                quizQuestionCount ===
-                                count
-                                  ? "border-accent bg-accent text-white"
-                                  : "border-border bg-background hover:bg-card"
-                              }`}
-                            >
-                              {count}
-                            </button>
-                          )
-                        )}
-
-                      </div>
-
-                    </div>
-
-                    <button
-                      onClick={
-                        handleStartQuiz
-                      }
-                      disabled={
-                        subject.documents.length ===
-                        0
-                      }
-                      className="mt-7 rounded-full bg-accent px-7 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      {subject.documents.length ===
-                      0
-                        ? "Add documents first"
-                        : `Start ${quizQuestionCount}-question quiz →`}
-                    </button>
-
-                  </div>
-
-                  <div className="rounded-3xl border border-border bg-background p-7">
-
-                    <p className="text-sm font-medium text-accent">
-                      YOUR QUIZ
-                    </p>
-
-                    <div className="mt-6 flex items-center justify-center">
-
-                      <div className="flex h-36 w-36 flex-col items-center justify-center rounded-full border-8 border-border">
-
-                        <span className="font-serif text-4xl">
-                          {quizQuestionCount}
-                        </span>
-
-                        <span className="mt-1 text-xs text-muted">
-                          questions
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                    <div className="mt-7 space-y-3 text-sm">
-
-                      <div className="flex justify-between rounded-xl bg-card px-4 py-3">
-
-                        <span className="text-muted">
-                          Subject
-                        </span>
-
-                        <span className="max-w-[55%] truncate font-medium">
-                          {subject.name}
-                        </span>
-
-                      </div>
-
-                      <div className="flex justify-between rounded-xl bg-card px-4 py-3">
-
-                        <span className="text-muted">
-                          Source
-                        </span>
-
-                        <span className="font-medium">
-                          Your documents
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-              ) : (
-
-                <div className="rounded-2xl border border-border bg-background p-8 text-center">
-
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-accent text-xl text-white">
-                    ✓
-                  </div>
-
-                  <h3 className="mt-5 font-serif text-3xl">
-                    Quiz setup complete
-                  </h3>
-
-                  <p className="mx-auto mt-3 max-w-lg text-sm leading-7 text-muted">
-                    Your{" "}
-                    {quizQuestionCount}
-                    -question quiz for{" "}
-                    {subject.name} is ready for
-                    the AI question-generation
-                    layer.
-                  </p>
-
-                  <p className="mt-4 text-xs text-muted">
-                    AI question generation will
-                    be connected in the next stage.
-                  </p>
-
-                  <button
-                    onClick={() =>
-                      setQuizStarted(false)
-                    }
-                    className="mt-6 rounded-full border border-border px-6 py-3 text-sm font-medium transition hover:bg-card"
-                  >
-                    Change quiz settings
-                  </button>
-
-                </div>
-
-              )}
-
-            </div>
-          )}
-
-          {/* =================================================
-              KEY TOPICS PANEL
-          ================================================= */}
-
-          {activeStudyTool === "topics" && (
-            <div className="mt-6 rounded-3xl border border-border bg-card p-7 shadow-sm md:p-8">
-
-              <div className="mb-6">
-
-                <div className="mb-3 inline-flex rounded-full bg-background px-4 py-2 text-xs font-medium text-accent">
-                  KNOW WHAT MATTERS
-                </div>
-
-                <h3 className="font-serif text-3xl">
-                  Key topics
-                </h3>
-
-                <p className="mt-2 max-w-2xl text-sm leading-7 text-muted">
-                  Your important concepts will be
-                  generated from the actual contents
-                  of your uploaded documents once the
-                  AI analysis layer is connected.
-                </p>
-
-              </div>
-
-              <div className="rounded-2xl border border-dashed border-border bg-background p-6 text-center">
-
-                <p className="text-sm font-medium">
-                  Personalized key topics will
-                  appear here.
-                </p>
-
-                <p className="mt-2 text-xs text-muted">
-                  The document processing pipeline
-                  is being connected first.
-                </p>
-
-              </div>
-
-            </div>
-          )}
-
-          {/* =================================================
-              FLOWCHART PANEL
-          ================================================= */}
-
-          {activeStudyTool === "flowchart" && (
-            <div className="mt-6 rounded-3xl border border-border bg-card p-7 shadow-sm md:p-8">
-
-              <div className="mb-7">
-
-                <div className="mb-3 inline-flex rounded-full bg-background px-4 py-2 text-xs font-medium text-accent">
-                  VISUAL LEARNING
-                </div>
-
-                <h3 className="font-serif text-3xl">
-                  Learning flow
-                </h3>
-
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-                  A simple visual structure for
-                  understanding how your{" "}
-                  {subject.name} material can be
-                  connected.
-                </p>
-
-              </div>
-
-              <div className="overflow-x-auto pb-3">
-
-                <div className="mx-auto flex min-w-[760px] items-center justify-center gap-3">
-
-                  <div className="w-40 rounded-2xl border border-border bg-background p-5 text-center">
-
-                    <div className="text-xl">
-                      📚
-                    </div>
-
-                    <p className="mt-3 text-sm font-semibold">
-                      Study material
-                    </p>
-
-                    <p className="mt-1 text-xs text-muted">
-                      Your documents
-                    </p>
-
-                  </div>
-
-                  <div className="text-xl text-muted">
-                    →
-                  </div>
-
-                  <div className="w-40 rounded-2xl border border-border bg-background p-5 text-center">
-
-                    <div className="text-xl">
-                      ✦
-                    </div>
-
-                    <p className="mt-3 text-sm font-semibold">
-                      Key concepts
-                    </p>
-
-                    <p className="mt-1 text-xs text-muted">
-                      Important ideas
-                    </p>
-
-                  </div>
-
-                  <div className="text-xl text-muted">
-                    →
-                  </div>
-
-                  <div className="w-40 rounded-2xl border border-border bg-background p-5 text-center">
-
-                    <div className="text-xl">
-                      ◎
-                    </div>
-
-                    <p className="mt-3 text-sm font-semibold">
-                      Connections
-                    </p>
-
-                    <p className="mt-1 text-xs text-muted">
-                      How ideas relate
-                    </p>
-
-                  </div>
-
-                  <div className="text-xl text-muted">
-                    →
-                  </div>
-
-                  <div className="w-40 rounded-2xl border border-border bg-background p-5 text-center">
-
-                    <div className="text-xl">
-                      ✓
-                    </div>
-
-                    <p className="mt-3 text-sm font-semibold">
-                      Mastery
-                    </p>
-
-                    <p className="mt-1 text-xs text-muted">
-                      Test yourself
-                    </p>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-              <div className="mt-8 rounded-2xl border border-dashed border-border bg-background p-5 text-center">
-
-                <p className="text-sm font-medium">
-                  Your personalized flowchart will
-                  appear here.
-                </p>
-
-                <p className="mt-1 text-xs text-muted">
-                  It will be generated from the actual
-                  contents of your uploaded documents
-                  once the AI document-analysis layer
-                  is connected.
-                </p>
-
-              </div>
-
-            </div>
-          )}
-
-        </section>
+        <StudyTools
+          subjectId={subject.id}
+          subjectName={subject.name}
+          documentCount={subject.documents.length}
+        />
 
       </div>
 
